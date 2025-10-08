@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LuminChat</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+</head>
+<body>
+  <div class="fix-overlay" style="display: none;"></div>
+
+  <div class="background"></div>
+  
+  <!-- Auth Container -->
+  <div class="auth-container" id="auth">
+    <!-- Sign In -->
+    <div id="signinPage" class="page active">
+      <h2>Kirish</h2>
+      <input type="email" id="signinEmail" placeholder="Email">
+      <input type="password" id="signinPass" placeholder="Parol">
+      <button onclick="signIn()">Kirish</button>
+      <p>Hisobingiz yo'qmi? <a onclick="showPage('signupPage')">Ro'yxatdan o'tish</a></p>
+    </div>
+
+    <!-- Sign Up -->
+    <div id="signupPage" class="page">
+      <h2>Ro'yxatdan o'tish</h2>
+      <input type="text" id="signupUser" placeholder="Foydalanuvchi nomi">
+      <input type="email" id="signupEmail" placeholder="Email">
+      <input type="password" id="signupPass" placeholder="Parol">
+      <button onclick="sendCode()">Kodni yuborish</button>
+      <p>Hisobingiz bormi? <a onclick="showPage('signinPage')">Kirish</a></p>
+    </div>
+
+    <!-- Verify -->
+    <div id="verifyPage" class="page">
+      <h2>Email tasdiqlash</h2>
+      <input type="text" id="verifyCode" placeholder="Kod kiriting">
+      <button onclick="verifyCode()">Tasdiqlash</button>
+    </div>
+  </div>
+
+  <!-- Chat Page -->
+  <div id="chatPage" class="page">
+    <div class="chat-container">
+
+      <div class="header">
+        <h2>💬 LuminChat</h2>
+      </div>
+
+      <div class="group-section">
+        <div class="section-title">📂 Guruh tanlang yoki yangi guruh yarating</div>
+        <div class="group-controls">
+          <select id="groupSelect" onchange="changeGroup(this.value)">
+            <option value="">— Guruh tanlang —</option>
+          </select>
+          <button class="btn-delete" onclick="deleteSelectedGroup()">🗑️ O'chirish</button>
+        </div>
+        <div class="group-create">
+          <input type="text" id="groupName" placeholder="Yangi guruh nomi">
+          <button class="btn-create" onclick="createGroup()">➕ Guruh qo'shish</button>
+        </div>
+      </div>
+
+      <div id="chatBox" class="chat-box">
+        <div class="welcome-message">
+          <div class="welcome-icon">💬</div>
+          <h3>LuminChat ga xush kelibsiz!</h3>
+          <p>Guruh tanlang yoki yangi guruh yarating</p>
+        </div>
+      </div>
+
+      <div class="input-section">
+        <div class="input-group">
+          <input type="text" id="chatMessage" placeholder="Xabar yozing..." onkeypress="handleKeyPress(event)">
+          <button class="btn-send" onclick="sendMessage()">Yuborish</button>
+        </div>
+        <a class="btn-voice" href="index (3).html">
+          <span class="voice-icon">📡</span>
+          LIVE muloqot
+        </a>
+      </div>
+
+      <button class="btn-logout" onclick="logout()">
+        <span class="logout-icon">🚪</span>
+        Chiqish
+      </button>
+
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>

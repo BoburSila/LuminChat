@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>LuminChat</title>
+
+    <style>
+        :root{
+            --bg1: #0f1724;
+            --bg2: #071029;
+            --card: rgba(255,255,255,0.04);
+            --glass: rgba(255,255,255,0.03);
+            --accent: #6EE7B7;
+            --accent2: #7C4DFF;
+            --muted: rgba(255,255,255,0.65);
+            --neon-shadow: 0 0 12px rgba(124,77,255,0.15), 0 0 24px rgba(110,231,183,0.06);
+            --radius: 14px;
+        }
+
+        html,body{
+            height:100%;
+            margin:0;
+            padding:0;
+            font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+            background: linear-gradient(180deg, var(--bg1) 0%, var(--bg2) 100%);
+            color:#e6eef8;
+            -webkit-font-smoothing:antialiased;
+            -moz-osx-font-smoothing:grayscale;
+        }
+
+        /* Page layout */
+        body {
+            text-decoration: none;
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            padding:32px;
+        }
+
+        .stage {
+            width:100%;
+            max-width:1100px;
+            background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+            border-radius:20px;
+            padding:26px;
+            box-shadow: 0 8px 30px rgba(2,6,23,0.7);
+            border: 1px solid rgba(255,255,255,0.03);
+            display:grid;
+            grid-template-columns: 360px 1fr;
+            gap:20px;
+            align-items:start;
+        }
+
+        /* Header */
+        h2{
+            margin:0 0 14px 0;
+            font-size:20px;
+            letter-spacing:0.2px;
+            color: #ffffff;
+            text-shadow: 0 2px 24px rgba(124,77,255,0.08);
+        }
+
+        /* Left column */
+        .controls {
+            background: linear-gradient(180deg, rgba(255,255,255,0.015), rgba(255,255,255,0.01));
+            padding:18px;
+            border-radius:12px;
+            border:1px solid rgba(255,255,255,0.02);
+            box-shadow: var(--neon-shadow);
+        }
+
+        .btn-row {
+            display:flex;
+            gap:12px;
+            margin:12px 0 18px 0;
+            flex-wrap:wrap;
+        }
+
+        button {
+            -webkit-appearance:none;
+            appearance:none;
+            border: none;
+            padding:10px 14px;
+            border-radius:10px;
+            font-weight:600;
+            cursor:pointer;
+            background: linear-gradient(90deg, rgba(124,77,255,0.95), rgba(110,231,183,0.9));
+            color:#021227;
+            box-shadow: 0 6px 18px rgba(12,22,45,0.6), 0 0 18px rgba(124,77,255,0.12);
+            transition: transform .12s ease, box-shadow .12s ease, opacity .12s;
+        }
+
+        button:active{ transform: translateY(1px) scale(.998); }
+        button:hover{ box-shadow: 0 10px 30px rgba(12,22,45,0.7), 0 0 30px rgba(124,77,255,0.18); }
+
+        /* Small caption under video */
+        #local-video small{
+            display:block;
+            color:var(--muted);
+            margin-bottom:8px;
+            font-size:12px;
+        }
+
+        /* Video container styles */
+        #local-video {
+            width: 100%;
+            height: 150px;
+            border-radius: 12px;
+            overflow: hidden;
+            background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            flex-direction:column;
+            border: 1px solid rgba(110,231,183,0.08);
+            box-shadow: 0 8px 28px rgba(2,6,23,0.7), 0 0 18px rgba(110,231,183,0.04);
+        }
+
+        /* Right column: area where remote videos will appear */
+        .remote-area {
+            display:flex;
+            flex-direction:column;
+            gap:14px;
+            min-height:200px;
+        }
+
+        .remote-grid {
+            display:flex;
+            flex-wrap:wrap;
+            gap:12px;
+            align-items:flex-start;
+        }
+
+        /* Remote videos (match IDs that start with remote-video-) */
+        [id^="remote-video-"] {
+            width: 200px;
+            height: 150px;
+            border-radius: 12px;
+            overflow: hidden;
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            background: linear-gradient(180deg, rgba(255,255,255,0.01), rgba(255,255,255,0.005));
+            border: 1px solid rgba(255,255,255,0.03);
+            box-shadow: 0 8px 24px rgba(2,6,23,0.6), 0 0 12px rgba(124,77,255,0.06);
+            position:relative;
+        }
+
+        /* Red border replaced with subtle neon outline */
+        [id^="remote-video-"]::after{
+            content:"";
+            position:absolute;
+            inset:0;
+            border-radius:12px;
+            pointer-events:none;
+            box-shadow: inset 0 0 0 2px rgba(124,77,255,0.04);
+        }
+
+        /* Video element inside containers (Agora attaches <video>) */
+        [id^="remote-video-"] video,
+        #local-video video {
+            width:100%;
+            height:100%;
+            object-fit:cover;
+            display:block;
+        }
+
+        /* Info text */
+        .info {
+            font-size:13px;
+            color:var(--muted);
+            margin-top:6px;
+        }
+
+        /* Footer small notes */
+        .note {
+            font-size:12px;
+            color:rgba(255,255,255,0.5);
+            margin-top:10px;
+        }
+
+        /* Responsive */
+        @media (max-width:920px){
+            .stage{
+                grid-template-columns: 1fr;
+            }
+            .controls{
+                order:2;
+            }
+            .remote-area{
+                order:1;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="stage">
+        <div class="controls">
+            <h2>Ovozli muloqotga xush kelibsiz!!</h2>
+
+            <div class="btn-row">
+                <button onclick="join()">ulanish</button>
+                <button ><a style="text-decoration: none; color: #021227;" href="index.html">chiqish</a></button>
+            </div>
+
+            <!-- Local video uchun -->
+            <div id="local-video">
+                <small>Sizning kamerangiz</small>
+            </div>
+
+            <div class="info">
+                Kanal: <strong>BoburSila</strong><br />
+                Status: <span id="status">offline</span>
+            </div>
+
+            <div class="note">
+                Eslatma: brauzer ruxsatlari (kamera/mikrofon) talab qilinadi.
+            </div>
+        </div>
+
+        <div class="remote-area">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+                <div style="font-weight:700;">Boshqalar</div>
+                <div style="font-size:13px; color:var(--muted)">Videolar avtomatik qo'shiladi</div>
+            </div>
+
+            <div class="remote-grid" id="remote-grid">
+                <!-- Remote videolar avtomatik shu yerga qo'shiladi -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Agora SDK -->
+    <script src="https://download.agora.io/sdk/release/AgoraRTC_N.js"></script>
+
+    <script>
+        // O'zingizning APP ID va Tokenni shu yerga qo'ying
+        const APP_ID = "cb5f83893ee543958990b15a00c341fb"; // <-- o'zgartiring
+        const TOKEN = null; // token ishlatayotgan bo'lsangiz string kiriting, aks holda null
+        const CHANNEL = "BoburSila";
+
+        let client = AgoraRTC.createClient({ mode: 'rtc', codec: 'vp8' });
+        let localAudioTrack = null;
+        let localVideoTrack = null;
+        let joined = false;
+
+        // Eventlarni oldindan ro'yxatga olish (join qilgandan keyin ham ishlaydi)
+        client.on("user-published", async (user, mediaType) => {
+            try {
+                await client.subscribe(user, mediaType);
+                console.log("Subscribed to:", user.uid, mediaType);
+
+                if (mediaType === "video") {
+                    // Agar oldin div bo'lmasa, yaratamiz
+                    let remoteDiv = document.getElementById("remote-video-" + user.uid);
+                    if (!remoteDiv) {
+                        remoteDiv = document.createElement("div");
+                        remoteDiv.id = "remote-video-" + user.uid;
+                        document.getElementById("remote-grid").appendChild(remoteDiv);
+                    }
+                    // video trackni shu divga chiqarish
+                    user.videoTrack.play(remoteDiv.id);
+                }
+
+                if (mediaType === "audio") {
+                    user.audioTrack.play();
+                }
+            } catch (err) {
+                console.error("Subscribe xatosi:", err);
+            }
+        });
+
+        client.on("user-unpublished", (user, mediaType) => {
+            // video yoki audio unpublish bo'lsa, domni o'chirish
+            const el = document.getElementById("remote-video-" + user.uid);
+            if (el) el.remove();
+        });
+
+        client.on("user-left", (user) => {
+            const el = document.getElementById("remote-video-" + user.uid);
+            if (el) el.remove();
+        });
+
+        async function join() {
+            if (joined) {
+                alert("Siz allaqachon ulandingiz");
+                return;
+            }
+
+            try {
+                // Kanalga ulanish (APP_ID va TOKEN to'g'ri ekanligiga ishonch hosil qiling)
+                const uid = await client.join(APP_ID, CHANNEL, TOKEN, null);
+                console.log("Joined with uid:", uid);
+
+                // Local audio va video yaratish (kamera va mikrofonga ruxsat so'raydi)
+                [localAudioTrack, localVideoTrack] = await Promise.all([
+                    AgoraRTC.createMicrophoneAudioTrack(),
+                    AgoraRTC.createCameraVideoTrack()
+                ]);
+
+                // Local konteynerni tozalab video oynasini joylash
+                const localDiv = document.getElementById("local-video");
+                localDiv.innerHTML = ""; // ichidagini bo'shatish (smallni ham olib tashlaydi)
+                // agora video play qila olish uchun id string kerak
+                // lokal videoni shu konteynerga chiqaramiz
+                localVideoTrack.play("local-video");
+
+                // Publish qilish (shu bir marta)
+                await client.publish([localAudioTrack, localVideoTrack]);
+                console.log("Local tracks published");
+
+                document.getElementById('status').textContent = 'online';
+                joined = true;
+                alert("Muvaffaqiyatli ulandi!");
+            } catch (error) {
+                console.error("Join xatosi:", error);
+                alert("Xatolik: " + (error && error.message ? error.message : error));
+            }
+        }
+
+        async function leave() {
+            try {
+                if (localAudioTrack) {
+                    localAudioTrack.stop();
+                    localAudioTrack.close();
+                    localAudioTrack = null;
+                }
+                if (localVideoTrack) {
+                    localVideoTrack.stop();
+                    localVideoTrack.close();
+                    localVideoTrack = null;
+                }
+
+                if (joined) {
+                    await client.leave();
+                    joined = false;
+                }
+
+                // remote videolarni tozalash
+                document.querySelectorAll('[id^="remote-video-"]').forEach(el => el.remove());
+
+                // local konteynerni asl holatga qaytarish
+                document.getElementById("local-video").innerHTML = '<small>Sizning kamerangiz</small>';
+                document.getElementById('status').textContent = 'offline';
+                alert("Chiqib ketildi");
+            } catch (err) {
+                console.error("Leave xatosi:", err);
+            }
+        }
+    </script>
+</body>
+
+</html>
